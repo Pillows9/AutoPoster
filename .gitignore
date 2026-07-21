@@ -1,0 +1,34 @@
+# ── ไฟล์ Credential / Secret ──────────────────────────────────────────────────
+credentials.json
+youtube_token.json
+tiktok_cookies.json
+tiktok_session.json
+
+# ── Build output ───────────────────────────────────────────────────────────────
+build/
+dist/
+*.spec.bak
+
+# ── Python cache ───────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# ── Virtual environment ────────────────────────────────────────────────────────
+venv/
+.env/
+env/
+.venv/
+
+# ── OS files ──────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── IDE ───────────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo

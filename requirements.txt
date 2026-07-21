@@ -1,0 +1,11 @@
+# ── Auto Poster Dependencies ──────────────────────────────────────────────────
+# ติดตั้งด้วย:  pip install -r requirements.txt
+# จากนั้นรัน:   playwright install chromium
+
+customtkinter>=5.2.0
+google-api-python-client>=2.100.0
+google-auth>=2.23.0
+google-auth-oauthlib>=1.1.0
+google-auth-httplib2>=0.1.1
+playwright>=1.40.0
+plyer>=2.1.0
