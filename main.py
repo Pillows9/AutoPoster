@@ -1,7 +1,6 @@
 import os
 import sys
 import json
-import asyncio
 import threading
 import tkinter as tk
 from tkinter import filedialog
