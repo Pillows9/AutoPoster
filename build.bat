@@ -44,12 +44,16 @@ if %errorlevel% neq 0 (
 )
 
 echo.
-echo  [4/4] คัดลอก credentials.json ไปยัง dist...
+echo  [4/4] คัดลอก credentials.json และ Anuphan.ttf ไปยัง dist...
 if exist credentials.json (
     copy credentials.json "dist\AutoPoster\credentials.json" >nul
     echo  คัดลอก credentials.json สำเร็จ
 ) else (
     echo  [WARNING] ไม่พบ credentials.json - โปรดวางไว้ใน dist\AutoPoster\ เอง
+)
+if exist Anuphan.ttf (
+    copy Anuphan.ttf "dist\AutoPoster\Anuphan.ttf" >nul
+    echo  คัดลอก Anuphan.ttf สำเร็จ
 )
 
 echo.

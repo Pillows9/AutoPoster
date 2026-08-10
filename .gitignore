@@ -3,6 +3,8 @@ credentials.json
 youtube_token.json
 tiktok_cookies.json
 tiktok_session.json
+facebook_cookies.json
+instagram_cookies.json
 
 # ── Build output ───────────────────────────────────────────────────────────────
 build/
