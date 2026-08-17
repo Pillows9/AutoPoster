@@ -889,6 +889,16 @@ class AutoPosterApp(ctk.CTk):
         tags = [t.strip().lstrip("#") for t in raw.replace(",", " ").split() if t.strip()]
         return " ".join(f"#{t}" for t in tags if t)
 
+    def _get_tag_list(self):
+        raw = self.txt_hashtags.get("1.0", tk.END).strip()
+        user_tags = [t.strip().lstrip("#") for t in raw.replace(",", " ").split() if t.strip()] if raw else []
+        defaults = ["Shorts", "YouTubeShorts"]
+        combined = []
+        for t in user_tags + defaults:
+            if t not in combined:
+                combined.append(t)
+        return combined
+
     # ══════════════════════════════════════════════════════════════════════
     #  POSTING
     # ══════════════════════════════════════════════════════════════════════
@@ -1471,11 +1481,12 @@ class AutoPosterApp(ctk.CTk):
         full_title = title if "#Shorts" in title else f"{title} #Shorts"
         privacy    = self.yt_privacy.get()
 
+        yt_tags    = self._get_tag_list()
         body = {
             "snippet": {
                 "title":       full_title,
                 "description": desc,
-                "tags":        ["Shorts", "YouTubeShorts", "viral"],
+                "tags":        yt_tags,
                 "categoryId":  "22",
             },
             "status": {"privacyStatus": privacy},
