@@ -34,6 +34,9 @@ except ImportError:
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
 
+# Stable base directory — works whether run via python main.py, IDE, or .exe
+APP_DIR = os.path.dirname(os.path.abspath(__file__))
+
 BG      = "#07070d"
 GLASS0  = "#0a0a14"
 GLASS1  = "#0e0e1c"
@@ -72,8 +75,7 @@ IG_BG = "#100810"
 # ── FONT LOADING (Anuphan from Google Fonts) ──────────────────────────────
 def _init_anuphan_font():
     font_filename = "Anuphan.ttf"
-    base_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
-    font_path = os.path.join(base_dir, font_filename)
+    font_path = os.path.join(APP_DIR, font_filename)
 
     if not os.path.exists(font_path):
         try:
@@ -106,7 +108,7 @@ def get_icon(name, size=(18, 18)):
         "upload": "upload.png",
         "paste": "paste.png"
     }
-    base_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
+    base_dir = APP_DIR
     path = os.path.join(base_dir, filename_map.get(name, ""))
     if os.path.exists(path):
         try:
@@ -1300,8 +1302,15 @@ class AutoPosterApp(ctk.CTk):
             pass
 
     def yt_logout(self):
-        if os.path.exists("youtube_token.json"):
-            os.remove("youtube_token.json")
+        from tkinter import messagebox
+        ok = messagebox.askyesno(
+            "Disconnect YouTube",
+            "ลบ YouTube Token?\n\nจะต้อง Login ใหม่ครั้งถัดไปที่อัปโหลด",
+            icon="warning")
+        if not ok:
+            return
+        if os.path.exists(os.path.join(APP_DIR, "youtube_token.json")):
+            os.remove(os.path.join(APP_DIR, "youtube_token.json"))
         self.lbl_yt_account.configure(text="Not connected", text_color=MUTED)
         self.dot_yt.configure(text_color=MUTED)
         self._log("YouTube token removed — will re-authenticate on next upload")
@@ -1310,8 +1319,7 @@ class AutoPosterApp(ctk.CTk):
     #  TIKTOK — COOKIE IMPORT
     # ══════════════════════════════════════════════════════════════════════
     def _tt_cookies_path(self):
-        base = os.path.dirname(os.path.abspath(sys.argv[0]))
-        return os.path.join(base, "tiktok_cookies.json")
+        return os.path.join(APP_DIR, "tiktok_cookies.json")
 
     def tt_import_cookies(self):
         raw = self.txt_tt_cookies.get("1.0", tk.END).strip()
@@ -1362,8 +1370,7 @@ class AutoPosterApp(ctk.CTk):
     #  FACEBOOK — COOKIE IMPORT
     # ══════════════════════════════════════════════════════════════════════
     def _fb_cookies_path(self):
-        base = os.path.dirname(os.path.abspath(sys.argv[0]))
-        return os.path.join(base, "facebook_cookies.json")
+        return os.path.join(APP_DIR, "facebook_cookies.json")
 
     def fb_import_cookies(self):
         self._import_cookies_generic(
@@ -1387,8 +1394,7 @@ class AutoPosterApp(ctk.CTk):
     #  INSTAGRAM — COOKIE IMPORT
     # ══════════════════════════════════════════════════════════════════════
     def _ig_cookies_path(self):
-        base = os.path.dirname(os.path.abspath(sys.argv[0]))
-        return os.path.join(base, "instagram_cookies.json")
+        return os.path.join(APP_DIR, "instagram_cookies.json")
 
     def ig_import_cookies(self):
         self._import_cookies_generic(
@@ -1450,30 +1456,32 @@ class AutoPosterApp(ctk.CTk):
     #  YOUTUBE UPLOAD
     # ======================================================================
     def upload_to_youtube(self, video_path, title, desc):
-        SCOPES = ["https://www.googleapis.com/auth/youtube.upload"]
-        creds  = None
+        SCOPES    = ["https://www.googleapis.com/auth/youtube.upload"]
+        creds     = None
+        token_path = os.path.join(APP_DIR, "youtube_token.json")
+        creds_path = os.path.join(APP_DIR, "credentials.json")
 
-        if os.path.exists("youtube_token.json"):
+        if os.path.exists(token_path):
             creds = google.oauth2.credentials.Credentials.from_authorized_user_file(
-                "youtube_token.json", SCOPES)
+                token_path, SCOPES)
 
         if creds and creds.expired and creds.refresh_token:
             try:
                 self._log("Refreshing YouTube token...")
                 creds.refresh(Request())
-                with open("youtube_token.json", "w") as f:
+                with open(token_path, "w") as f:
                     f.write(creds.to_json())
             except Exception:
                 self._log("Token refresh failed -- will re-authenticate")
                 creds = None
 
         if not creds or not creds.valid:
-            if not os.path.exists("credentials.json"):
+            if not os.path.exists(creds_path):
                 raise Exception(
                     "credentials.json not found -- place it next to the app")
-            flow  = InstalledAppFlow.from_client_secrets_file("credentials.json", SCOPES)
+            flow  = InstalledAppFlow.from_client_secrets_file(creds_path, SCOPES)
             creds = flow.run_local_server(port=0)
-            with open("youtube_token.json", "w") as f:
+            with open(token_path, "w") as f:
                 f.write(creds.to_json())
             threading.Thread(target=self._fetch_yt_channel_name, daemon=True).start()
 
@@ -1590,17 +1598,42 @@ class AutoPosterApp(ctk.CTk):
                     );
                 }
             """
-            try:
-                page.wait_for_function(JS_BTN_READY, timeout=120000)
-                self._log("Post button ready -- video processed OK")
-            except Exception:
+
+            # Wait up to 5 minutes for large 4K files to encode
+            post_ready = False
+            for attempt in range(6):  # 6 × 50s = 5 minutes
+                try:
+                    page.wait_for_function(JS_BTN_READY, timeout=50000)
+                    self._log("Post button ready -- video processed OK")
+                    post_ready = True
+                    break
+                except Exception:
+                    elapsed = (attempt + 1) * 50
+                    self._log(f"Still processing... ({elapsed}s elapsed, max 300s)")
+                    self._set_progress(0.25 + attempt * 0.04,
+                                       f"TikTok -- encoding ({elapsed}s)...", TT)
+
+            if not post_ready:
                 self._log("Timeout waiting for Post button -- proceeding anyway")
             self._set_progress(0.5, "TikTok -- filling form...", TT)
 
-            # -- Dismiss tutorial overlay (react-joyride) ---------------
+            # -- Dismiss tutorial / feature overlay (any modal with 'Got it' or close button)
             try:
+                page.wait_for_timeout(600)
+                # Try clicking "Got it" / "ตกลง" button in any overlay/modal
+                for got_it_text in ["Got it", "ตกลง", "OK", "Close", "ปิด"]:
+                    try:
+                        btn = page.get_by_role("button", name=got_it_text, exact=True).first
+                        if btn.is_visible(timeout=1500):
+                            btn.click()
+                            self._log(f"Dismissed overlay: '{got_it_text}'")
+                            page.wait_for_timeout(400)
+                            break
+                    except Exception:
+                        pass
+                # Fallback: press Escape + remove known overlay DOM elements
                 page.keyboard.press("Escape")
-                page.wait_for_timeout(400)
+                page.wait_for_timeout(300)
                 page.evaluate(
                     "document.querySelectorAll("
                     "'[data-test-id=\"overlay\"],"
@@ -1608,7 +1641,6 @@ class AutoPosterApp(ctk.CTk):
                     "#react-joyride-portal'"
                     ").forEach(el=>el.remove())"
                 )
-                self._log("Dismissed tutorial overlay")
             except Exception:
                 pass
 
