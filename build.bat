@@ -3,63 +3,77 @@ title AutoPoster Builder
 color 0A
 echo.
 echo  =============================================
-echo    AutoPoster .EXE Builder
+echo    AutoPoster .EXE Builder  v2
 echo  =============================================
 echo.
 
-echo  [1/4] กำลังติดตั้ง PyInstaller...
-python -m pip install pyinstaller
+echo  [1/5] Installing dependencies...
+python -m pip install pyinstaller pillow customtkinter playwright google-auth google-auth-oauthlib google-api-python-client plyer
 if %errorlevel% neq 0 (
-    echo.
-    echo  [ERROR] pip ล้มเหลว ตรวจสอบ Python อีกครั้ง
+    echo  [ERROR] pip failed
     pause
     exit /b 1
 )
 
 echo.
-echo  [2/4] กำลังติดตั้ง Chromium สำหรับ Playwright...
+echo  [2/5] Installing Playwright Chromium...
 python -m playwright install chromium
 if %errorlevel% neq 0 (
-    echo.
-    echo  [ERROR] ติดตั้ง Chromium ล้มเหลว
+    echo  [ERROR] Playwright install failed
     pause
     exit /b 1
 )
 
 echo.
-echo  [3/4] กำลัง Build AutoPoster.exe ...
+echo  [3/5] Building AutoPoster.exe...
 python -m PyInstaller ^
     --noconfirm ^
     --onedir ^
     --windowed ^
     --collect-data customtkinter ^
+    --collect-data PIL ^
     --name "AutoPoster" ^
     main.py
 
 if %errorlevel% neq 0 (
-    echo.
-    echo  [ERROR] Build ล้มเหลว ดูข้อความ error ด้านบน
+    echo  [ERROR] PyInstaller build failed
     pause
     exit /b 1
 )
 
 echo.
-echo  [4/4] คัดลอก credentials.json และ Anuphan.ttf ไปยัง dist...
+echo  [4/5] Copying assets to dist\AutoPoster\...
+
 if exist credentials.json (
-    copy credentials.json "dist\AutoPoster\credentials.json" >nul
-    echo  คัดลอก credentials.json สำเร็จ
+    copy credentials.json "dist\AutoPoster\credentials.json" ^>nul
+    echo  [OK] credentials.json
 ) else (
-    echo  [WARNING] ไม่พบ credentials.json - โปรดวางไว้ใน dist\AutoPoster\ เอง
+    echo  [WARNING] credentials.json not found - copy it manually to dist\AutoPoster\
 )
-if exist Anuphan.ttf (
-    copy Anuphan.ttf "dist\AutoPoster\Anuphan.ttf" >nul
-    echo  คัดลอก Anuphan.ttf สำเร็จ
+
+for %%F in (Anuphan.ttf yt.png tt.png fb.png ig.png upload.png paste.png) do (
+    if exist %%F (
+        copy %%F "dist\AutoPoster\%%F" ^>nul
+        echo  [OK] %%F
+    ) else (
+        echo  [WARNING] %%F not found
+    )
+)
+
+echo.
+echo  [5/5] Verifying build...
+for %%F in (AutoPoster.exe Anuphan.ttf yt.png tt.png fb.png ig.png upload.png paste.png) do (
+    if exist "dist\AutoPoster\%%F" (
+        echo  [PASS] %%F
+    ) else (
+        echo  [MISSING] %%F  ^<-- copy this file manually
+    )
 )
 
 echo.
 echo  =============================================
-echo   BUILD สำเร็จ!
-echo   ไฟล์อยู่ที่: dist\AutoPoster\AutoPoster.exe
+echo   BUILD COMPLETE!
+echo   Output: dist\AutoPoster\AutoPoster.exe
 echo  =============================================
 echo.
 explorer dist\AutoPoster

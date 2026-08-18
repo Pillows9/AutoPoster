@@ -34,8 +34,13 @@ except ImportError:
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
 
-# Stable base directory — works whether run via python main.py, IDE, or .exe
-APP_DIR = os.path.dirname(os.path.abspath(__file__))
+# Stable base directory — works in dev (python main.py) AND PyInstaller .exe
+if getattr(sys, "frozen", False):
+    # Running as compiled .exe — use the .exe's directory
+    APP_DIR = os.path.dirname(sys.executable)
+else:
+    # Running as .py script — use the script's directory
+    APP_DIR = os.path.dirname(os.path.abspath(__file__))
 
 BG      = "#07070d"
 GLASS0  = "#0a0a14"
