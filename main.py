@@ -897,14 +897,38 @@ class AutoPosterApp(ctk.CTk):
         return " ".join(f"#{t}" for t in tags if t)
 
     def _get_tag_list(self):
+        """Build YouTube tag list.
+
+        YouTube Data API rules:
+        - Each tag: max 100 characters
+        - All tags combined: max 500 characters total
+        - Tags containing spaces must be quoted (API handles this automatically)
+        """
         raw = self.txt_hashtags.get("1.0", tk.END).strip()
         user_tags = [t.strip().lstrip("#") for t in raw.replace(",", " ").split() if t.strip()] if raw else []
         defaults = ["Shorts", "YouTubeShorts"]
+
+        # Deduplicate (preserve order)
         combined = []
         for t in user_tags + defaults:
             if t not in combined:
                 combined.append(t)
-        return combined
+
+        # Enforce per-tag limit (100 chars each)
+        combined = [t[:100] for t in combined if t]
+
+        # Enforce total 500 char limit
+        result = []
+        total = 0
+        for t in combined:
+            if total + len(t) + (1 if result else 0) > 500:
+                self._log(f"YouTube tags: reached 500-char limit, dropped '{t}' and beyond")
+                break
+            total += len(t) + (1 if result else 0)
+            result.append(t)
+
+        self._log(f"YouTube tags ({len(result)}): {result}")
+        return result
 
     # ══════════════════════════════════════════════════════════════════════
     #  POSTING
