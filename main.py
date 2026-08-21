@@ -1738,7 +1738,24 @@ class AutoPosterApp(ctk.CTk):
             self._log("Post button clicked -- waiting for confirmation...")
             self._set_progress(0.85, "TikTok -- confirming...", TT)
 
-            # Wait for redirect to /content (up to 60s)
+            # -- Handle "Continue to post?" copyright check dialog -----------
+            # TikTok shows this when Content check lite is still running.
+            # Must click "Post now" to confirm and proceed.
+            try:
+                page.wait_for_timeout(1500)
+                for post_now_text in ["Post now", "โพสต์เลย", "Post Now"]:
+                    try:
+                        btn_postnow = page.get_by_role("button", name=post_now_text, exact=True).first
+                        if btn_postnow.is_visible(timeout=3000):
+                            btn_postnow.click()
+                            self._log(f"Confirmed 'Continue to post?' dialog → clicked '{post_now_text}'")
+                            page.wait_for_timeout(500)
+                            break
+                    except Exception:
+                        pass
+            except Exception:
+                pass
+
             try:
                 page.wait_for_url(
                     lambda url: "upload" not in url,
