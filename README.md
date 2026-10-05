@@ -1,9 +1,13 @@
 <div align="center">
 
-# ✦ AutoPoster
+<img src="assets/brand/app_icon.png" width="96" alt="AutopostVideo" />
 
-**โพสต์วิดีโอขึ้น YouTube Shorts และ TikTok อัตโนมัติ**  
-*Auto-post videos to YouTube Shorts & TikTok with one click*
+# AutopostVideo
+
+**สร้างคอนเทนต์ แล้วให้เราช่วยโพสต์** — ตั้งเวลา · โพสต์อัตโนมัติ · หลายแพลตฟอร์ม
+
+**โพสต์วิดีโอขึ้น YouTube Shorts, TikTok, Facebook Reels และ Instagram Reels อัตโนมัติ**  
+*Auto-post videos to YouTube Shorts, TikTok, Facebook & Instagram Reels with one click*
 
 ![Python](https://img.shields.io/badge/Python-3.10%2B-blue?style=flat-square&logo=python)
 ![Platform](https://img.shields.io/badge/Platform-Windows-blue?style=flat-square&logo=windows)
@@ -15,12 +19,13 @@
 
 ## ✨ Features
 
-- 🎬 **อัพโหลดวิดีโอ** ขึ้น YouTube Shorts และ TikTok พร้อมกันในคลิกเดียว
-- ⏰ **ตั้งเวลาโพสต์** ล่วงหน้าได้
-- 🏷️ **Hashtag อัตโนมัติ** ตั้งค่าครั้งเดียวใช้ได้ทุกโพสต์
-- 🔒 **ตั้ง Visibility** ได้แยกแต่ละ Platform (Public / Unlisted / Private)
-- 🍪 **Cookie-based TikTok auth** — ไม่ต้องใช้ API ที่ต้องรอ Approve
-- 📊 **Activity log + Progress bar** ดูสถานะ Upload แบบ Real-time
+- 🎬 **อัพโหลดวิดีโอ** ขึ้น YouTube Shorts / TikTok / Facebook / Instagram พร้อมกันในคลิกเดียว
+- 🖱️ **Drag & Drop** ลากไฟล์วิดีโอวางบนหน้าต่างได้เลย
+- ⏰ **ตั้งเวลาโพสต์** ล่วงหน้าได้ (ยกเลิกได้ทุกเมื่อ)
+- 🏷️ **Hashtag + ค่าที่ตั้งไว้ถูกจำไว้** ใช้ซ้ำได้ทุกครั้งที่เปิดแอพ (`settings.json`)
+- 🔒 **ตั้ง Visibility** ได้แยกแต่ละ Platform
+- 🍪 **Cookie-based auth** สำหรับ TikTok / Facebook / Instagram — พร้อมเตือนเมื่อ cookies ใกล้หมดอายุ
+- 📊 **Activity log + Progress bar** ดูสถานะแบบ Real-time และบันทึกลง `autoposter.log`
 - 🔔 **Windows Notification** แจ้งเตือนเมื่อโพสต์เสร็จ
 
 ---
@@ -31,7 +36,7 @@
 |--|--|
 | OS | Windows 10/11 |
 | Python | 3.10 หรือสูงกว่า |
-| Chrome | ติดตั้งอยู่บนเครื่อง (สำหรับ TikTok) |
+| Chrome | แนะนำให้ติดตั้ง (ถ้าไม่มีจะใช้ Chromium ของ Playwright แทน) |
 
 ---
 
@@ -65,17 +70,21 @@ python main.py
 
 ---
 
-## 🍪 ตั้งค่า TikTok (Cookie Import)
+## 🍪 ตั้งค่า TikTok / Facebook / Instagram (Cookie Import)
 
 ไม่ต้องใช้ API — ใช้ cookies จาก browser แทน:
 
 1. ติดตั้ง Chrome Extension: **[Cookie-Editor](https://chrome.google.com/webstore/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm)**
-2. เปิด [tiktok.com](https://www.tiktok.com) และ Login
-3. คลิก Cookie-Editor → **Export** → **Export as JSON** → Copy
-4. เปิดแอพ → Tab **Accounts** → Paste ใน textbox → กด **Import**
+2. เปิดเว็บของ Platform นั้น (เช่น [tiktok.com](https://www.tiktok.com)) และ Login
+3. คลิก Cookie-Editor → **Export** → **Export as JSON** (จะ copy ลง clipboard)
+4. เปิดแอพ → Tab **Accounts** → กด **Paste & Import**
 
 > ✅ Cookies จะถูกบันทึกไว้อัตโนมัติ — ไม่ต้องกรอกซ้ำทุกครั้ง  
-> ⚠️ ต้อง Import ใหม่เมื่อ TikTok Logout หรือ Cookies หมดอายุ (~30-60 วัน)
+> ⚠️ ต้อง Import ใหม่เมื่อ Logout หรือ Cookies หมดอายุ (แอพจะเตือนล่วงหน้า 14 วัน)
+
+## ▶️ ตั้งค่า YouTube
+
+วาง `credentials.json` ไว้ข้างแอพ แล้วไปที่ Tab **Accounts** → **Sign in** (หรือจะ Login ตอนอัปโหลดครั้งแรกก็ได้)
 
 ---
 
@@ -84,9 +93,7 @@ python main.py
 ```bat
 .\build.bat
 ```
-ไฟล์ `.exe` จะอยู่ที่ `dist\AutoPoster\AutoPoster.exe`
-
-> **หมายเหตุ:** ต้องวาง `credentials.json` ไว้ใน `dist\AutoPoster\` ด้วย
+ไฟล์ `.exe` จะอยู่ที่ `dist\AutopostVideo\AutopostVideo.exe` (build จะ copy โฟลเดอร์ `assets\`, `credentials.json` และไฟล์บัญชีจาก build เก่า `dist\AutoPoster\` ให้อัตโนมัติ)
 
 ---
 
@@ -94,11 +101,17 @@ python main.py
 
 ```
 AutoPoster/
-├── main.py              # แอพหลัก
-├── requirements.txt     # Python dependencies
-├── build.bat            # Build script (Windows)
-├── AutoPoster.spec      # PyInstaller spec
-└── credentials.json     # ← วางเองหลัง clone (ไม่ push ขึ้น git)
+├── main.py                     # แอพหลัก (UI + uploaders)
+├── DESIGN.md                   # หลักการออกแบบ / design tokens — อ่านก่อนแก้ UI
+├── assets/
+│   ├── brand/                  # โลโก้ + ไอคอนแอป (สร้างด้วย tools/make_brand_assets.py)
+│   ├── fonts/                  # ฟอนต์ Prompt (OFL)
+│   └── icons/                  # โลโก้แพลตฟอร์ม
+├── docs/brand-board.webp       # Brand Board ต้นฉบับ
+├── tools/make_brand_assets.py  # สร้างโลโก้/ไอคอนใหม่
+├── requirements.txt
+├── build.bat                   # Build .exe (Windows)
+└── credentials.json            # ← วางเองหลัง clone (ไม่ push ขึ้น git)
 ```
 
 ---
@@ -106,8 +119,9 @@ AutoPoster/
 ## ⚠️ Important Notes
 
 - `credentials.json` **ห้าม** push ขึ้น GitHub เด็ดขาด (มี `.gitignore` กัน)
-- `tiktok_cookies.json` เก็บ session cookie ส่วนตัว — ไม่ควรแชร์
-- แอพนี้ใช้ Playwright เปิด Chrome จริง (ไม่ใช่ headless) สำหรับ TikTok
+- `*_cookies.json` / `youtube_token.json` เก็บ session ส่วนตัว — ไม่ควรแชร์
+- แอพนี้ใช้ Playwright เปิด Chrome จริง (ไม่ใช่ headless) สำหรับ TikTok / Facebook / Instagram
+- ถ้าโพสต์ไม่สำเร็จ กด **Open log file** ในหน้า Post เพื่อดูรายละเอียด error
 
 ---
 

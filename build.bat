@@ -1,14 +1,17 @@
 @echo off
-title AutoPoster Builder
+chcp 65001 >nul
+title AutopostVideo Builder
 color 0A
+set APP=AutopostVideo
+set OUT=dist\%APP%
 echo.
 echo  =============================================
-echo    AutoPoster .EXE Builder  v2
+echo    %APP% .EXE Builder  v2.1
 echo  =============================================
 echo.
 
 echo  [1/5] Installing dependencies...
-python -m pip install pyinstaller pillow customtkinter playwright google-auth google-auth-oauthlib google-api-python-client plyer
+python -m pip install pyinstaller -r requirements.txt
 if %errorlevel% neq 0 ( echo  [ERROR] pip failed & pause & exit /b 1 )
 
 echo.
@@ -17,25 +20,29 @@ python -m playwright install chromium
 if %errorlevel% neq 0 ( echo  [ERROR] Playwright install failed & pause & exit /b 1 )
 
 echo.
-echo  [3/5] Building AutoPoster.exe...
-python -m PyInstaller --noconfirm --onedir --windowed --collect-data customtkinter --collect-data PIL --name "AutoPoster" main.py
+echo  [3/5] Building %APP%.exe...
+python -m PyInstaller --noconfirm --onedir --windowed --icon "assets\brand\app_icon.ico" --collect-data customtkinter --collect-data PIL --collect-data googleapiclient --collect-all tkinterdnd2 --name "%APP%" main.py
 if %errorlevel% neq 0 ( echo  [ERROR] PyInstaller build failed & pause & exit /b 1 )
 
 echo.
-echo  [4/5] Copying assets to dist\AutoPoster\...
-for %%F in (credentials.json Anuphan.ttf yt.png tt.png fb.png ig.png upload.png paste.png) do (
+echo  [4/5] Copying assets + your account files to %OUT%\...
+xcopy /e /i /y /q assets "%OUT%\assets" >nul
+echo  [OK] assets\
+REM Account files: from the project folder, or carried over from the old dist\AutoPoster build
+for %%F in (credentials.json youtube_token.json tiktok_cookies.json facebook_cookies.json instagram_cookies.json settings.json) do (
     if exist %%F (
-        xcopy /y /q %%F "dist\AutoPoster\"
+        xcopy /y /q %%F "%OUT%\" >nul
         echo  [OK] %%F
-    ) else (
-        echo  [WARNING] %%F not found
+    ) else if exist "dist\AutoPoster\%%F" (
+        if not exist "%OUT%\%%F" xcopy /y /q "dist\AutoPoster\%%F" "%OUT%\" >nul
+        echo  [OK] %%F  ^(from old dist\AutoPoster^)
     )
 )
 
 echo.
 echo  [5/5] Verifying build...
-for %%F in (AutoPoster.exe credentials.json Anuphan.ttf yt.png tt.png fb.png ig.png upload.png paste.png) do (
-    if exist "dist\AutoPoster\%%F" (
+for %%F in (%APP%.exe credentials.json assets\brand\app_icon.ico assets\fonts\Prompt-Regular.ttf assets\icons\yt.png) do (
+    if exist "%OUT%\%%F" (
         echo  [PASS] %%F
     ) else (
         echo  [MISSING] %%F  ^<-- copy this file manually
@@ -45,8 +52,8 @@ for %%F in (AutoPoster.exe credentials.json Anuphan.ttf yt.png tt.png fb.png ig.
 echo.
 echo  =============================================
 echo   BUILD COMPLETE!
-echo   Output: dist\AutoPoster\AutoPoster.exe
+echo   Output: %OUT%\%APP%.exe
 echo  =============================================
 echo.
-explorer dist\AutoPoster
+explorer %OUT%
 pause

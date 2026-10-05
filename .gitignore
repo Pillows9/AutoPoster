@@ -6,9 +6,14 @@ tiktok_session.json
 facebook_cookies.json
 instagram_cookies.json
 
+# ── Per-user runtime files ────────────────────────────────────────────────────
+settings.json
+autoposter.log
+
 # ── Build output ───────────────────────────────────────────────────────────────
 build/
 dist/
+*.spec
 *.spec.bak
 
 # ── Python cache ───────────────────────────────────────────────────────────────

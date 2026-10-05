@@ -16,7 +16,7 @@
 | **Icons** | Flaticon PNG (yt.png, tt.png, fb.png, ig.png, upload.png, paste.png) |
 | **Platform** | Windows 10/11 only |
 | **Entry Point** | `main.py` (~2,000 บรรทัด) |
-| **Repository** | `C:\Users\usEr\Documents\Autoposter` / GitHub: Pillows9/AutoPoster |
+| **Repository** | `C:\Users\usEr\Documents\Project\Autoposter` / GitHub: Pillows9/AutoPoster |
 
 ---
 
@@ -273,6 +273,47 @@ dist\AutoPoster\
 
 ---
 
+## 8.5 Finalize Pass (2026-10-05)
+
+**ระบบ (Threading / ความถูกต้อง)**
+- Worker thread ไม่แตะ Tk widget ตรงๆ แล้ว — ทุก UI update ผ่าน `self._ui(fn)` → queue → main thread (`_drain_ui_queue`)
+- `_post_now()` snapshot ค่าทุกฟิลด์ลง `job` dict ก่อนเริ่ม → upload functions รับ `job` (ไม่เรียก `.get()` จาก thread)
+- Schedule ใช้ `self.after()` แทน `threading.Timer` + ปุ่ม Post กลายเป็น **Cancel Schedule** (เดิมปิด schedule แล้วปุ่มค้าง disabled ถาวร)
+- path `youtube_token.json` ใช้ `APP_DIR` ทุกจุด (เดิมบางจุดอิง cwd)
+- YouTube: ขอ scope `youtube.readonly` เพิ่ม (เดิม `channels.list` โดน 403 → ชื่อช่องไม่เคยขึ้น), refresh token ตอนเปิดแอพ, OAuth timeout 5 นาที, ตัด title ≤100 ตัว / ลบ `< >`, retry chunk เมื่อ 5xx/เน็ตหลุด
+- Cookie import เก็บ `secure/httpOnly/sameSite/expires` (เดิมทิ้ง → เตือนหมดอายุไม่เคยทำงาน) + เช็คว่า cookies ตรงโดเมน
+- Caption ในช่อง "Caption" ถูกส่งไป TikTok/FB/IG แล้ว (เดิมไปแค่ YouTube)
+- Instagram รอข้อความ "shared" สูงสุด 5 นาที (เดิมปิด browser หลัง 10 วิ → upload ใหญ่โดนตัด)
+- Facebook ลบ selector `div:has-text("Public")` ที่ force-click กลางหน้าจอแบบสุ่ม
+- FB/IG ที่ยืนยันไม่ได้ → สถานะ "?" (unconfirmed) แทนที่จะรายงานว่าสำเร็จ
+- ไม่มี Google Chrome → fallback เป็น Playwright Chromium
+
+**UX/UI**
+- Header ไม่ล้นแล้ว (รวม connection dot เข้าไปใน pill, คลิก dot → ไป Accounts)
+- หน้าต่างปรับขนาดตามจอ (รองรับ 125–150% scaling), ปิดแอพระหว่างโพสต์มี confirm
+- Drag & Drop จริง (`tkinterdnd2`, mixin `DnDWrapper` บน root) + คลิก dropzone เพื่อ browse
+- Placeholder จริงใน textbox (เดิม paste ต่อท้าย placeholder → JSON error)
+- Pre-flight: เช็ค account ที่ยังไม่ connect ก่อนเริ่มโพสต์
+- จำค่า platforms / hashtags / privacy / โฟลเดอร์ล่าสุด ใน `settings.json`
+- Log มีสี + เขียนลง `autoposter.log` (ปุ่ม Open log file), ตัวนับความยาว title
+- Accounts: การ์ด cookie 3 อันรวมเป็น `_build_cookie_card()`, ปุ่ม Sign in YouTube, confirm ก่อน Disconnect
+
+## 8.6 Redesign → AutopostVideo (2026-10-06)
+
+> **กฎ: ทุกการแก้ UI ต้องทำตาม [`DESIGN.md`](DESIGN.md)** (สรุปจาก Brand Board `docs/brand-board.webp`)
+
+- แบรนด์ใหม่ **AutopostVideo** — โลโก้/ไอคอนสร้างจาก `tools/make_brand_assets.py` → `assets/brand/` (ห้ามแก้ภาพมือ)
+- Light theme: sidebar ขาว (โลโก้, เมนู 4 หน้า, กล่อง "การเชื่อมต่อ") + พื้นที่หลัก `#F1F5F9` + การ์ดขาว + action bar ล่าง
+- หน้า: **สร้างโพสต์** / **แพลตฟอร์ม** / **กิจกรรม** (log) / **ตั้งค่า** — `self._show_page(key)`
+- ฟอนต์ Prompt (`assets/fonts`) ผ่าน `F(size, weight)` weight = regular|medium|semibold|bold
+- ไอคอน UI = glyph จาก Segoe Fluent Icons / MDL2 ผ่าน `glyph(code, color, size)`
+- Components: `Card`, `PrimaryButton`, `SecondaryButton`, `DangerButton`, `Switch`, `Entry`, `Textbox`, `ChipGroup`, `StatusBadge`
+- สถานะการเชื่อมต่อรวมศูนย์ที่ `_set_conn(pkey, kind, short, detail)` → แจ้งทุก widget ที่ลงทะเบียนใน `_conn_listeners`
+- ข้อความแจ้งเตือนเป็น toast มุมขวาบน (`update_status` → `_toast`) — ไม่มี status bar แล้ว
+- Layout responsive: `_responsive_columns()` 2 คอลัมน์ ≥ 860px ไม่งั้นเรียงแถวเดียว
+- UI ภาษาไทยทั้งหมด (log เทคนิคยังเป็นอังกฤษได้)
+- assets ย้ายเข้า `assets/` แล้ว; ลบ Anuphan.ttf, upload.png, paste.png; exe ชื่อ `AutopostVideo.exe`
+
 ## 9. สถานะปัจจุบัน (Last Known State — 2026-08-18)
 
 - ✅ YouTube upload ทำงานปกติ (ทดสอบสำเร็จ — เห็น URL `youtu.be/...` ใน log)
@@ -303,4 +344,4 @@ dist\AutoPoster\
 
 ---
 
-*เอกสารนี้อัปเดตล่าสุด: 2026-08-18 · โดย AI Agent (Antigravity / Claude Sonnet 4.6)*
+*เอกสารนี้อัปเดตล่าสุด: 2026-10-06 · โดย Claude Code (Redesign — ดู §8.6 และ DESIGN.md)*
