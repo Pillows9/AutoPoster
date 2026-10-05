@@ -125,7 +125,7 @@ COLOR_KIND = {SUCCESS: "ok", WARNING: "warn", ERROR: "err"}
 TEXT_SAFE  = {SUCCESS: SUCCESS_T, WARNING: WARNING_T, ERROR: ERROR_T, PRIMARY: PRIMARY_H}
 
 
-# ── FONTS (Prompt — assets/fonts, loaded privately via Windows GDI) ────────
+# ── FONTS (IBM Plex Sans Thai — assets/fonts, loaded privately via Windows GDI) ────────
 def _init_fonts():
     font_dir = asset("fonts")
     if os.name != "nt" or not os.path.isdir(font_dir):
@@ -141,14 +141,14 @@ def _init_fonts():
 
 
 _init_fonts()
-_FONT_FAMILY = {"regular": "Prompt", "medium": "Prompt Medium",
-                "semibold": "Prompt SemiBold", "bold": "Prompt"}
+_FONT_FAMILY = {"regular": "IBM Plex Sans Thai", "medium": "IBM Plex Sans Thai Medium",
+                "semibold": "IBM Plex Sans Thai SemiBold", "bold": "IBM Plex Sans Thai"}
 
 
 @lru_cache(maxsize=64)
 def F(size=15, weight="regular"):
-    """Prompt font. weight: regular | medium | semibold | bold (see DESIGN.md §4)."""
-    return ctk.CTkFont(family=_FONT_FAMILY.get(weight, "Prompt"), size=size,
+    """UI font (IBM Plex Sans Thai). weight: regular | medium | semibold | bold (see DESIGN.md §4)."""
+    return ctk.CTkFont(family=_FONT_FAMILY.get(weight, _FONT_FAMILY["regular"]), size=size,
                        weight="bold" if weight == "bold" else "normal")
 
 
@@ -248,12 +248,57 @@ def DangerButton(parent, text, command, height=40, **kw):
         font=F(14, "medium"), corner_radius=12, **kw)
 
 
-def Switch(parent, variable, command=None, **kw):
-    return ctk.CTkSwitch(parent, text="", variable=variable, command=command,
-        width=46, height=24, switch_width=42, switch_height=22,
-        fg_color=BORDER_2, progress_color=PRIMARY,
-        button_color="#FFFFFF", button_hover_color="#FFFFFF",
-        onvalue=True, offvalue=False, **kw)
+@lru_cache(maxsize=8)
+def _switch_image(on, hover, w=44, h=24):
+    """Anti-aliased switch: knob inset inside an outlined track (DESIGN.md §6)."""
+    s = 4                                   # supersample
+    W, H = w * s, h * s
+    img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    if on:
+        track, outline = (PRIMARY_H if hover else PRIMARY), PRIMARY_H
+    else:
+        track, outline = ("#B6C2D1" if hover else BORDER_2), TEXT_3
+    d.rounded_rectangle((0, 0, W - 1, H - 1), radius=H // 2, fill=track, outline=outline, width=s * 2)
+    pad = 4 * s
+    r = H - 2 * pad
+    x0 = W - pad - r if on else pad
+    d.ellipse((x0, pad, x0 + r, pad + r), fill="#FFFFFF",
+              outline=None if on else TEXT_3, width=s)
+    img = img.resize((w * 2, h * 2), Image.LANCZOS)
+    return ctk.CTkImage(light_image=img, dark_image=img, size=(w, h))
+
+
+class Switch(ctk.CTkLabel):
+    """On/off switch drawn as an image. CTkSwitch paints its white knob over the
+    border, so it vanished on white cards — this one keeps the knob inset with an outline."""
+
+    def __init__(self, parent, variable, command=None):
+        super().__init__(parent, text="", width=44, height=24, cursor="hand2")
+        self._var, self._command, self._hover = variable, command, False
+        self.bind("<Button-1>", self._toggle)
+        self.bind("<Enter>", lambda _e: self._set_hover(True))
+        self.bind("<Leave>", lambda _e: self._set_hover(False))
+        variable.trace_add("write", lambda *_: self._render())
+        self._render()
+
+    def get(self):
+        return bool(self._var.get())
+
+    def _toggle(self, _e=None):
+        self._var.set(not self.get())
+        if self._command:
+            self._command()
+
+    def _set_hover(self, hover):
+        self._hover = hover
+        self._render()
+
+    def _render(self):
+        try:
+            self.configure(image=_switch_image(self.get(), self._hover))
+        except tk.TclError:
+            pass   # widget already destroyed
 
 
 def Entry(parent, placeholder="", **kw):

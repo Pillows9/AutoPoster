@@ -71,7 +71,11 @@
 
 ## 4. ตัวอักษร (Typography)
 
-ฟอนต์ **Prompt** (รองรับไทย/อังกฤษ) — ไฟล์อยู่ที่ `assets/fonts/` (OFL) โหลดผ่าน Windows GDI ตอนเปิดแอป
+ฟอนต์ **IBM Plex Sans Thai** (รองรับไทย/อังกฤษ) — ไฟล์อยู่ที่ `assets/fonts/` (OFL) โหลดผ่าน Windows GDI ตอนเปิดแอป
+
+> **เปลี่ยนจาก Brand Board:** Board กำหนด Prompt แต่บน Windows (Tk/GDI) Prompt ตัวเล็กไม่คมและดูไม่สวย —
+> ผู้ใช้เลือก IBM Plex Sans Thai เมื่อ 2026-10-06 หลังเทียบ 6 ฟอนต์บนหน้าจอจริง (Prompt, IBM Plex Sans Thai, Noto Sans Thai, Kanit, Bai Jamjuree, Leelawadee UI)
+> ถ้าจะเปลี่ยนฟอนต์อีก ให้เทียบบนหน้าจอแอปจริงก่อนเสมอ ไม่ใช่ดูจากตัวอย่างบนเว็บ
 
 | ระดับ | ขนาด / น้ำหนัก | ใช้กับ | Helper |
 |---|---|---|---|
@@ -120,7 +124,7 @@
 | **Secondary button** | พื้นขาว, border `BORDER_2`, ตัวอักษร `TEXT`, hover `SURFACE_2` |
 | **Danger button** | พื้นขาว, border `#FECACA`, ตัวอักษร `ERROR_T`, hover `ERROR_BG` (เช่น ยกเลิกการเชื่อมต่อ) |
 | **Chip group** | ตัวเลือกแบบแคปซูล — ที่เลือก: `PRIMARY` ตัวอักษรขาว · ไม่ได้เลือก: ขาว + border `BORDER_2` (ใช้แทน CTkSegmentedButton) |
-| **Switch** | track `BORDER_2` → `PRIMARY`, ปุ่มขาว |
+| **Switch** | 44×24, track `BORDER_2` → `PRIMARY`, **ขอบ** `TEXT_3` (ปิด) / `PRIMARY_H` (เปิด), ปุ่มขาวอยู่ด้านใน (เว้น 4px) และมีขอบ `TEXT_3` ตอนปิด — ต้องมีขอบเสมอ ไม่งั้นปุ่มขาวจะกลืนกับการ์ดขาว วาดเป็นภาพด้วย PIL (`_switch_image`) เพราะ CTkSwitch วาดปุ่มทับขอบ |
 | **Input / Textbox** | พื้นขาว, border `BORDER_2`, radius 12, placeholder `TEXT_3` |
 | **Status badge** | แคปซูล `*_BG` + ตัวอักษร `*_T` เช่น "เชื่อมต่อแล้ว" |
 | **Nav item** | สูง 44, radius 12, ไอคอน + ข้อความ — ที่เลือก: พื้น `PRIMARY_TINT` ตัวอักษร/ไอคอน `PRIMARY` |

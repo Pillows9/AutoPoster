@@ -105,7 +105,7 @@ AutoPoster/
 ├── DESIGN.md                   # หลักการออกแบบ / design tokens — อ่านก่อนแก้ UI
 ├── assets/
 │   ├── brand/                  # โลโก้ + ไอคอนแอป (สร้างด้วย tools/make_brand_assets.py)
-│   ├── fonts/                  # ฟอนต์ Prompt (OFL)
+│   ├── fonts/                  # ฟอนต์ IBM Plex Sans Thai (OFL)
 │   └── icons/                  # โลโก้แพลตฟอร์ม
 ├── docs/brand-board.webp       # Brand Board ต้นฉบับ
 ├── tools/make_brand_assets.py  # สร้างโลโก้/ไอคอนใหม่

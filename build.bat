@@ -41,7 +41,7 @@ for %%F in (credentials.json youtube_token.json tiktok_cookies.json facebook_coo
 
 echo.
 echo  [5/5] Verifying build...
-for %%F in (%APP%.exe credentials.json assets\brand\app_icon.ico assets\fonts\Prompt-Regular.ttf assets\icons\yt.png) do (
+for %%F in (%APP%.exe credentials.json assets\brand\app_icon.ico assets\fonts\IBMPlexSansThai-Regular.ttf assets\icons\yt.png) do (
     if exist "%OUT%\%%F" (
         echo  [PASS] %%F
     ) else (

@@ -305,7 +305,7 @@ dist\AutoPoster\
 - แบรนด์ใหม่ **AutopostVideo** — โลโก้/ไอคอนสร้างจาก `tools/make_brand_assets.py` → `assets/brand/` (ห้ามแก้ภาพมือ)
 - Light theme: sidebar ขาว (โลโก้, เมนู 4 หน้า, กล่อง "การเชื่อมต่อ") + พื้นที่หลัก `#F1F5F9` + การ์ดขาว + action bar ล่าง
 - หน้า: **สร้างโพสต์** / **แพลตฟอร์ม** / **กิจกรรม** (log) / **ตั้งค่า** — `self._show_page(key)`
-- ฟอนต์ Prompt (`assets/fonts`) ผ่าน `F(size, weight)` weight = regular|medium|semibold|bold
+- ฟอนต์ IBM Plex Sans Thai (`assets/fonts`, เดิม Prompt) ผ่าน `F(size, weight)` weight = regular|medium|semibold|bold
 - ไอคอน UI = glyph จาก Segoe Fluent Icons / MDL2 ผ่าน `glyph(code, color, size)`
 - Components: `Card`, `PrimaryButton`, `SecondaryButton`, `DangerButton`, `Switch`, `Entry`, `Textbox`, `ChipGroup`, `StatusBadge`
 - สถานะการเชื่อมต่อรวมศูนย์ที่ `_set_conn(pkey, kind, short, detail)` → แจ้งทุก widget ที่ลงทะเบียนใน `_conn_listeners`
